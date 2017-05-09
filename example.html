@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <base data-ice="baseUrl">
-  <title data-ice="title">MapdCon Example</title>
+  <title data-ice="title">Connector Example</title>
   <style>
   .axis {
     font: 10px sans-serif;
@@ -32,10 +32,7 @@
 
     <p><strong> Example 2: SELECT carrier_name as key0, AVG(airtime) AS val FROM flights_donotmodify WHERE airtime IS NOT NULL GROUP BY key0 ORDER BY val DESC LIMIT 20 </strong></p>
     <div id="chart"></div>
-    <script src="thrift/browser/thrift.js"></script>
-    <script src="thrift/browser/mapd_types.js"></script>
-    <script src="thrift/browser/mapd.thrift.js"></script>
-    <script src="dist/mapd-connector.js"></script>
+    <script src="dist/browser-connector.js"></script>
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
       var defaultQueryOptions = {};

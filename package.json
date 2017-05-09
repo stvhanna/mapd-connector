@@ -42,5 +42,8 @@
     "exclude": [
       "**/*.spec.js"
     ]
+  },
+  "dependencies": {
+    "script-loader": "^0.7.0"
   }
 }
