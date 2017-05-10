@@ -1,4 +1,6 @@
-/* global Thrift, TMapDException, MapDClient*/
+const MapDClient = (typeof window !== "undefined" && window.MapDClient) || require("../build/thrift/node/mapd.thrift.js").Client
+const TMapDException = (typeof window !== "undefined" && window.TMapDException) || require("../build/thrift/node/mapd_types.js").TMapDException
+const Thrift = (typeof window !== "undefined" && window.Thrift) || require("thrift").Thrift
 
 export function isResultError (result) {
   return (

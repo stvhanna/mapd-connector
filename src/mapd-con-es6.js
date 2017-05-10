@@ -1,8 +1,17 @@
-/* global Thrift*/
-
 import * as helpers from "./helpers"
 import MapDClientV2 from "./mapd-client-v2"
 import processQueryResults from "./process-query-results"
+import url from "url"
+
+const TDatumType = (typeof window !== "undefined" && window.TDatumType) || require("../build/thrift/node/mapd_types.js").TDatumType
+const MapDThrift = typeof require !== "undefined" && require("../build/thrift/node/mapd.thrift.js")
+let Thrift = (typeof window !== "undefined" && window.Thrift) || require("thrift")
+let superThrift = Thrift
+if (typeof window === "undefined") {
+  Thrift = Thrift.Thrift
+  Thrift.Transport = superThrift.TBufferedTransport
+  Thrift.Protocol = superThrift.TJSONProtocol
+}
 
 const COMPRESSION_LEVEL_DEFAULT = 3
 
@@ -104,9 +113,32 @@ class MapdCon {
 
     const transportUrls = this.getEndpoints()
     for (let h = 0; h < hostLength; h++) {
-      const transport = new Thrift.Transport(transportUrls[h])
-      const protocol = new Thrift.Protocol(transport)
-      const client = new MapDClientV2(protocol)
+      let client = null
+
+      if (typeof window === "undefined") {
+        const {protocol, hostname, port} = url.parse(transportUrls[h])
+        const connection = superThrift.createHttpConnection(
+          hostname,
+          port,
+          {
+            transport: superThrift.TBufferedTransport,
+            protocol: superThrift.TJSONProtocol,
+            path: "/",
+            headers: {Connection: "close"},
+            https: protocol === "https:"
+          }
+        )
+        console.log({url: transportUrls[h], protocol, hostname, port, MapDThriftKeys: Object.keys(MapDThrift)})
+        connection.on("error", console.error) // eslint-disable-line no-console
+        console.log("2")
+        client = superThrift.createClient(MapDThrift, connection)
+        console.log("3")
+      } else {
+        const thriftTransport = new Thrift.Transport(transportUrls[h])
+        const thriftProtocol = new Thrift.Protocol(thriftTransport)
+        client = new MapDClientV2(thriftProtocol)
+      }
+
       client.connect(this._user[h], this._password[h], this._dbName[h], (error, sessionId) => {
         if (error) {
           callback(error)
@@ -1131,9 +1163,9 @@ class MapdCon {
 
 // Set a global mapdcon function when mapdcon is brought in via script tag.
 if (typeof module === "object" && module.exports) {
-  if (window) {
+  if (typeof window !== "undefined") {
     window.MapdCon = MapdCon
   }
 }
 
-export default new MapdCon()
+export default MapdCon

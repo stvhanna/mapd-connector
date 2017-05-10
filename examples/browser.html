@@ -32,7 +32,7 @@
 
     <p><strong> Example 2: SELECT carrier_name as key0, AVG(airtime) AS val FROM flights_donotmodify WHERE airtime IS NOT NULL GROUP BY key0 ORDER BY val DESC LIMIT 20 </strong></p>
     <div id="chart"></div>
-    <script src="dist/browser-connector.js"></script>
+    <script src="../dist/browser-connector.js"></script>
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
       var defaultQueryOptions = {};
@@ -51,7 +51,7 @@
         // lists all tables in console
         con.getTablesAsync().then(function (result) {
           console.log("All tables available at metis.mapd.com':")
-          console.log(result)
+          console.log(result.map(x => x.name))
         })
 
         // The total number of tweets from Columbia
@@ -65,7 +65,7 @@
 
         con.getFields('flights_donotmodify', function (err, result) {
           console.log("All fields for 'flights_donotmodify':")
-          console.log(result)
+          console.log(result.map(x => x.name))
         })
 
         // try changing airtime to arrdelay in the query
