@@ -24929,10 +24929,6 @@ module.exports =
 
 	var _processQueryResults2 = _interopRequireDefault(_processQueryResults);
 
-	var _url = __webpack_require__(23);
-
-	var _url2 = _interopRequireDefault(_url);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
@@ -24942,8 +24938,11 @@ module.exports =
 	var TDatumType = typeof window !== "undefined" && window.TDatumType || __webpack_require__(52).TDatumType;
 	var MapDThrift = "function" !== "undefined" && __webpack_require__(53);
 	var Thrift = typeof window !== "undefined" && window.Thrift || __webpack_require__(1);
+
 	var superThrift = Thrift;
+	var parseUrl = null;
 	if (typeof window === "undefined") {
+	  parseUrl = __webpack_require__(23).parse;
 	  Thrift = Thrift.Thrift;
 	  Thrift.Transport = superThrift.TBufferedTransport;
 	  Thrift.Protocol = superThrift.TJSONProtocol;
@@ -25195,10 +25194,10 @@ module.exports =
 	        var client = null;
 
 	        if (typeof window === "undefined") {
-	          var _url$parse = _url2.default.parse(transportUrls[h]),
-	              protocol = _url$parse.protocol,
-	              hostname = _url$parse.hostname,
-	              port = _url$parse.port;
+	          var _parseUrl = parseUrl(transportUrls[h]),
+	              protocol = _parseUrl.protocol,
+	              hostname = _parseUrl.hostname,
+	              port = _parseUrl.port;
 
 	          var connection = superThrift.createHttpConnection(hostname, port, {
 	            transport: superThrift.TBufferedTransport,

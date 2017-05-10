@@ -1,8 +1,8 @@
+const MapDClient = (typeof window !== "undefined" && window.MapDClient) || require("../build/thrift/node/mapd.thrift.js").Client
+
 import {
   wrapWithErrorHandling
 } from "./wrap-with-error-handling"
-
-const MapDClient = (typeof window !== "undefined" && window.MapDClient) || require("../build/thrift/node/mapd.thrift.js").Client
 
 export default function MapDClientV2 (protocol) {
   MapDClient.call(this, protocol)

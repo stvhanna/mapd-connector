@@ -1,13 +1,15 @@
-import * as helpers from "./helpers"
-import MapDClientV2 from "./mapd-client-v2"
-import processQueryResults from "./process-query-results"
-import url from "url"
-
 const TDatumType = (typeof window !== "undefined" && window.TDatumType) || require("../build/thrift/node/mapd_types.js").TDatumType
 const MapDThrift = typeof require !== "undefined" && require("../build/thrift/node/mapd.thrift.js")
 let Thrift = (typeof window !== "undefined" && window.Thrift) || require("thrift")
-let superThrift = Thrift
+
+import * as helpers from "./helpers"
+import MapDClientV2 from "./mapd-client-v2"
+import processQueryResults from "./process-query-results"
+
+const superThrift = Thrift
+let parseUrl = null
 if (typeof window === "undefined") {
+  parseUrl = require("url").parse
   Thrift = Thrift.Thrift
   Thrift.Transport = superThrift.TBufferedTransport
   Thrift.Protocol = superThrift.TJSONProtocol
@@ -116,7 +118,7 @@ class MapdCon {
       let client = null
 
       if (typeof window === "undefined") {
-        const {protocol, hostname, port} = url.parse(transportUrls[h])
+        const {protocol, hostname, port} = parseUrl(transportUrls[h])
         const connection = superThrift.createHttpConnection(
           hostname,
           port,
