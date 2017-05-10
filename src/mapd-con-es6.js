@@ -1,18 +1,18 @@
-const TDatumType = (typeof window !== "undefined" && window.TDatumType) || require("../build/thrift/node/mapd_types.js").TDatumType
-const MapDThrift = typeof require !== "undefined" && require("../build/thrift/node/mapd.thrift.js")
-let Thrift = (typeof window !== "undefined" && window.Thrift) || require("thrift")
+const TDatumType = (typeof window !== "undefined" && window.TDatumType) || require("../build/thrift/node/mapd_types.js").TDatumType // eslint-disable-line global-require
+const MapDThrift = typeof require !== "undefined" && require("../build/thrift/node/mapd.thrift.js") // eslint-disable-line global-require
+let Thrift = (typeof window !== "undefined" && window.Thrift) || require("thrift") // eslint-disable-line global-require
 
 import * as helpers from "./helpers"
 import MapDClientV2 from "./mapd-client-v2"
 import processQueryResults from "./process-query-results"
 
-const superThrift = Thrift
+const thriftWrapper = Thrift
 let parseUrl = null
 if (typeof window === "undefined") {
-  parseUrl = require("url").parse
+  parseUrl = require("url").parse // eslint-disable-line global-require
   Thrift = Thrift.Thrift
-  Thrift.Transport = superThrift.TBufferedTransport
-  Thrift.Protocol = superThrift.TJSONProtocol
+  Thrift.Transport = thriftWrapper.TBufferedTransport
+  Thrift.Protocol = thriftWrapper.TJSONProtocol
 }
 
 const COMPRESSION_LEVEL_DEFAULT = 3
@@ -119,12 +119,12 @@ class MapdCon {
 
       if (typeof window === "undefined") {
         const {protocol, hostname, port} = parseUrl(transportUrls[h])
-        const connection = superThrift.createHttpConnection(
+        const connection = thriftWrapper.createHttpConnection(
           hostname,
           port,
           {
-            transport: superThrift.TBufferedTransport,
-            protocol: superThrift.TJSONProtocol,
+            transport: thriftWrapper.TBufferedTransport,
+            protocol: thriftWrapper.TJSONProtocol,
             path: "/",
             headers: {Connection: "close"},
             https: protocol === "https:"
@@ -133,7 +133,7 @@ class MapdCon {
         console.log({url: transportUrls[h], protocol, hostname, port, MapDThriftKeys: Object.keys(MapDThrift)})
         connection.on("error", console.error) // eslint-disable-line no-console
         console.log("2")
-        client = superThrift.createClient(MapDThrift, connection)
+        client = thriftWrapper.createClient(MapDThrift, connection)
         console.log("3")
       } else {
         const thriftTransport = new Thrift.Transport(transportUrls[h])

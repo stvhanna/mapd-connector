@@ -1,4 +1,4 @@
-const MapDClient = (typeof window !== "undefined" && window.MapDClient) || require("../build/thrift/node/mapd.thrift.js").Client
+const MapDClient = (typeof window !== "undefined" && window.MapDClient) || require("../build/thrift/node/mapd.thrift.js").Client // eslint-disable-line global-require
 
 import {
   wrapWithErrorHandling
