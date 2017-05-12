@@ -134,17 +134,17 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var TDatumType = typeof window !== "undefined" && window.TDatumType || __webpack_require__(116).TDatumType;
-	var MapDThrift = "function" !== "undefined" && __webpack_require__(13);
-	var Thrift = typeof window !== "undefined" && window.Thrift || __webpack_require__(14);
+	var TDatumType = typeof window !== "undefined" && window.TDatumType || __webpack_require__(116).TDatumType; // eslint-disable-line global-require
+	var MapDThrift = "function" !== "undefined" && __webpack_require__(13); // eslint-disable-line global-require
+	var Thrift = typeof window !== "undefined" && window.Thrift || __webpack_require__(14); // eslint-disable-line global-require
 
-	var superThrift = Thrift;
+	var thriftWrapper = Thrift;
 	var parseUrl = null;
 	if (typeof window === "undefined") {
-	  parseUrl = __webpack_require__(59).parse;
+	  parseUrl = __webpack_require__(59).parse; // eslint-disable-line global-require
 	  Thrift = Thrift.Thrift;
-	  Thrift.Transport = superThrift.TBufferedTransport;
-	  Thrift.Protocol = superThrift.TJSONProtocol;
+	  Thrift.Transport = thriftWrapper.TBufferedTransport;
+	  Thrift.Protocol = thriftWrapper.TJSONProtocol;
 	}
 
 	var COMPRESSION_LEVEL_DEFAULT = 3;
@@ -398,18 +398,15 @@
 	              hostname = _parseUrl.hostname,
 	              port = _parseUrl.port;
 
-	          var connection = superThrift.createHttpConnection(hostname, port, {
-	            transport: superThrift.TBufferedTransport,
-	            protocol: superThrift.TJSONProtocol,
+	          var connection = thriftWrapper.createHttpConnection(hostname, port, {
+	            transport: thriftWrapper.TBufferedTransport,
+	            protocol: thriftWrapper.TJSONProtocol,
 	            path: "/",
 	            headers: { Connection: "close" },
 	            https: protocol === "https:"
 	          });
-	          console.log({ url: transportUrls[h], protocol: protocol, hostname: hostname, port: port, MapDThriftKeys: Object.keys(MapDThrift) });
 	          connection.on("error", console.error); // eslint-disable-line no-console
-	          console.log("2");
-	          client = superThrift.createClient(MapDThrift, connection);
-	          console.log("3");
+	          client = thriftWrapper.createClient(MapDThrift, connection);
 	        } else {
 	          var thriftTransport = new Thrift.Transport(transportUrls[h]);
 	          var thriftProtocol = new Thrift.Protocol(thriftTransport);
@@ -1469,7 +1466,7 @@
 
 	var _wrapWithErrorHandling = __webpack_require__(12);
 
-	var MapDClient = typeof window !== "undefined" && window.MapDClient || __webpack_require__(13).Client;
+	var MapDClient = typeof window !== "undefined" && window.MapDClient || __webpack_require__(13).Client; // eslint-disable-line global-require
 
 	function MapDClientV2(protocol) {
 	  MapDClient.call(this, protocol);
@@ -1561,9 +1558,9 @@
 	exports.createResultError = createResultError;
 	exports.wrapMethod = wrapMethod;
 	exports.wrapWithErrorHandling = wrapWithErrorHandling;
-	var MapDClient = typeof window !== "undefined" && window.MapDClient || __webpack_require__(13).Client;
-	var TMapDException = typeof window !== "undefined" && window.TMapDException || __webpack_require__(116).TMapDException;
-	var Thrift = typeof window !== "undefined" && window.Thrift || __webpack_require__(14).Thrift;
+	var MapDClient = typeof window !== "undefined" && window.MapDClient || __webpack_require__(13).Client; // eslint-disable-line global-require
+	var TMapDException = typeof window !== "undefined" && window.TMapDException || __webpack_require__(116).TMapDException; // eslint-disable-line global-require
+	var Thrift = typeof window !== "undefined" && window.Thrift || __webpack_require__(14).Thrift; // eslint-disable-line global-require
 
 	function isResultError(result) {
 	  return result instanceof Thrift.TException || result instanceof Error;

@@ -130,11 +130,8 @@ class MapdCon {
             https: protocol === "https:"
           }
         )
-        console.log({url: transportUrls[h], protocol, hostname, port, MapDThriftKeys: Object.keys(MapDThrift)})
         connection.on("error", console.error) // eslint-disable-line no-console
-        console.log("2")
         client = thriftWrapper.createClient(MapDThrift, connection)
-        console.log("3")
       } else {
         const thriftTransport = new Thrift.Transport(transportUrls[h])
         const thriftProtocol = new Thrift.Protocol(thriftTransport)
