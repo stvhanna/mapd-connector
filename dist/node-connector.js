@@ -24935,23 +24935,31 @@ module.exports =
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var TDatumType = typeof window !== "undefined" && window.TDatumType || __webpack_require__(52).TDatumType; // eslint-disable-line global-require
-	var MapDThrift = "function" !== "undefined" && __webpack_require__(53); // eslint-disable-line global-require
-	var Thrift = typeof window !== "undefined" && window.Thrift || __webpack_require__(1); // eslint-disable-line global-require
+	var _ref = isNodeRuntime() && __webpack_require__(52) || window,
+	    TDatumType = _ref.TDatumType,
+	    TEncodingType = _ref.TEncodingType; // eslint-disable-line global-require
 
+
+	var MapDThrift = isNodeRuntime() && __webpack_require__(53); // eslint-disable-line global-require
+	var Thrift = isNodeRuntime() && __webpack_require__(1) || window.Thrift; // eslint-disable-line global-require
 	var thriftWrapper = Thrift;
-	var parseUrl = null;
-	if (typeof window === "undefined") {
-	  parseUrl = __webpack_require__(23).parse; // eslint-disable-line global-require
+	var parseUrl = isNodeRuntime() && __webpack_require__(23).parse; // eslint-disable-line global-require
+	if (isNodeRuntime()) {
+	  // Because browser Thrift and Node Thrift are exposed slightly differently.
 	  Thrift = Thrift.Thrift;
 	  Thrift.Transport = thriftWrapper.TBufferedTransport;
 	  Thrift.Protocol = thriftWrapper.TJSONProtocol;
 	}
 
+
 	var COMPRESSION_LEVEL_DEFAULT = 3;
 
 	function arrayify(maybeArray) {
 	  return Array.isArray(maybeArray) ? maybeArray : [maybeArray];
+	}
+
+	function isNodeRuntime() {
+	  return typeof window === "undefined";
 	}
 
 	var MapdCon = function () {
@@ -24966,13 +24974,7 @@ module.exports =
 
 	    this.getFrontendViews = function (callback) {
 	      if (_this._sessionId) {
-	        _this._client[0].get_frontend_views(_this._sessionId[0], function (error, views) {
-	          if (error) {
-	            callback(error);
-	          } else {
-	            callback(null, views);
-	          }
-	        });
+	        _this._client[0].get_frontend_views(_this._sessionId[0], callback);
 	      } else {
 	        callback(new Error("No Session ID"));
 	      }
@@ -24992,13 +24994,7 @@ module.exports =
 
 	    this.getFrontendView = function (viewName, callback) {
 	      if (_this._sessionId && viewName) {
-	        _this._client[0].get_frontend_view(_this._sessionId[0], viewName, function (error, view) {
-	          if (error) {
-	            callback(error);
-	          } else {
-	            callback(null, view);
-	          }
-	        });
+	        _this._client[0].get_frontend_view(_this._sessionId[0], viewName, callback);
 	      } else {
 	        callback(new Error("No Session ID"));
 	      }
@@ -25017,13 +25013,7 @@ module.exports =
 	    };
 
 	    this.getServerStatus = function (callback) {
-	      _this._client[0].get_server_status(_this._sessionId[0], function (result) {
-	        if ((typeof result === "undefined" ? "undefined" : _typeof(result)) === "object" && result.hasOwnProperty("read_only") && result.hasOwnProperty("rendering_enabled") && result.hasOwnProperty("version")) {
-	          callback(null, result);
-	        } else {
-	          callback(result, null);
-	        }
-	      });
+	      _this._client[0].get_server_status(_this._sessionId[0], callback);
 	    };
 
 	    this.getServerStatusAsync = function () {
@@ -25051,9 +25041,7 @@ module.exports =
 	    };
 
 	    this.getLinkView = function (link, callback) {
-	      _this._client[0].get_link_view(_this._sessionId[0], link, function (theLink) {
-	        callback(null, theLink);
-	      });
+	      _this._client[0].get_link_view(_this._sessionId[0], link, callback);
 	    };
 
 	    this.getLinkViewAsync = function (link) {
@@ -25193,7 +25181,7 @@ module.exports =
 	      var _loop = function _loop(h) {
 	        var client = null;
 
-	        if (typeof window === "undefined") {
+	        if (isNodeRuntime()) {
 	          var _parseUrl = parseUrl(transportUrls[h]),
 	              protocol = _parseUrl.protocol,
 	              hostname = _parseUrl.hostname,
@@ -25459,13 +25447,7 @@ module.exports =
 	    key: "detectColumnTypes",
 	    value: function detectColumnTypes(fileName, copyParams, callback) {
 	      var thriftCopyParams = helpers.convertObjectToThriftCopyParams(copyParams);
-	      this._client[0].detect_column_types(this._sessionId[0], fileName, thriftCopyParams, function (err, res) {
-	        if (err) {
-	          callback(err);
-	        } else {
-	          callback(null, res);
-	        }
-	      });
+	      this._client[0].detect_column_types(this._sessionId[0], fileName, thriftCopyParams, callback);
 	    }
 
 	    /**
@@ -25610,9 +25592,9 @@ module.exports =
 	      var _this9 = this;
 
 	      return new Promise(function (resolve, reject) {
-	        _this9._client[0].sql_validate(_this9._sessionId[0], query, function (err, res) {
-	          if (err) {
-	            reject(err);
+	        _this9._client[0].sql_validate(_this9._sessionId[0], query, function (error, res) {
+	          if (error) {
+	            reject(error);
 	          } else {
 	            resolve(_this9.convertFromThriftTypes(res));
 	          }
@@ -25720,7 +25702,7 @@ module.exports =
 	    value: function getFields(tableName, callback) {
 	      var _this11 = this;
 
-	      this._client[0].get_table_details(this._sessionId[0], tableName, function (fields) {
+	      this._client[0].get_table_details(this._sessionId[0], tableName, function (error, fields) {
 	        if (fields) {
 	          var rowDict = fields.row_desc.reduce(function (accum, value) {
 	            accum[value.col_name] = value;
@@ -25728,7 +25710,7 @@ module.exports =
 	          }, {});
 	          callback(null, _this11.convertFromThriftTypes(rowDict));
 	        } else {
-	          callback(new Error("Table (" + tableName + ") not found"));
+	          callback(new Error("Table (" + tableName + ") not found" + error));
 	        }
 	      });
 	    }
@@ -26208,7 +26190,7 @@ module.exports =
 
 
 	if (( false ? "undefined" : _typeof(module)) === "object" && module.exports) {
-	  if (typeof window !== "undefined") {
+	  if (!isNodeRuntime()) {
 	    window.MapdCon = MapdCon;
 	  }
 	}
@@ -26311,6 +26293,21 @@ module.exports =
 	  return getTablesWithErrorHandling.apply(undefined, arguments);
 	};
 
+	MapDClientV2.prototype.get_table_details = function () {
+	  var getTableDetailsWithErrorHandling = (0, _wrapWithErrorHandling.wrapWithErrorHandling)(this, "get_table_details");
+	  return getTableDetailsWithErrorHandling.apply(undefined, arguments);
+	};
+
+	MapDClientV2.prototype.get_fields = function () {
+	  var getFieldsWithErrorHandling = (0, _wrapWithErrorHandling.wrapWithErrorHandling)(this, "get_fields");
+	  return getFieldsWithErrorHandling.apply(undefined, arguments);
+	};
+
+	MapDClientV2.prototype.get_server_status = function () {
+	  var getServerStatusWithErrorHandling = (0, _wrapWithErrorHandling.wrapWithErrorHandling)(this, "get_server_status");
+	  return getServerStatusWithErrorHandling.apply(undefined, arguments);
+	};
+
 	MapDClientV2.prototype.get_frontend_views = function () {
 	  var getFrontEndViewsWithErrorHandling = (0, _wrapWithErrorHandling.wrapWithErrorHandling)(this, "get_frontend_views");
 	  return getFrontEndViewsWithErrorHandling.apply(undefined, arguments);
@@ -26324,6 +26321,16 @@ module.exports =
 	MapDClientV2.prototype.create_link = function () {
 	  var createLinkWithErrorHandling = (0, _wrapWithErrorHandling.wrapWithErrorHandling)(this, "create_link");
 	  return createLinkWithErrorHandling.apply(undefined, arguments);
+	};
+
+	MapDClientV2.prototype.get_link_view = function () {
+	  var getLinkViewWithErrorHandling = (0, _wrapWithErrorHandling.wrapWithErrorHandling)(this, "get_link_view");
+	  return getLinkViewWithErrorHandling.apply(undefined, arguments);
+	};
+
+	MapDClientV2.prototype.detect_column_types = function () {
+	  var detectColumnTypesWithErrorHandling = (0, _wrapWithErrorHandling.wrapWithErrorHandling)(this, "detect_column_types");
+	  return detectColumnTypesWithErrorHandling.apply(undefined, arguments);
 	};
 
 	MapDClientV2.prototype.create_frontend_view = function () {

@@ -1,23 +1,22 @@
-const TDatumType = (typeof window !== "undefined" && window.TDatumType) || require("../build/thrift/node/mapd_types.js").TDatumType // eslint-disable-line global-require
-const MapDThrift = typeof require !== "undefined" && require("../build/thrift/node/mapd.thrift.js") // eslint-disable-line global-require
-let Thrift = (typeof window !== "undefined" && window.Thrift) || require("thrift") // eslint-disable-line global-require
-
-import * as helpers from "./helpers"
-import MapDClientV2 from "./mapd-client-v2"
-import processQueryResults from "./process-query-results"
-
+const {TDatumType, TEncodingType} = (isNodeRuntime() && require("../build/thrift/node/mapd_types.js")) || window // eslint-disable-line global-require
+const MapDThrift = isNodeRuntime() && require("../build/thrift/node/mapd.thrift.js") // eslint-disable-line global-require
+let Thrift = (isNodeRuntime() && require("thrift")) || window.Thrift // eslint-disable-line global-require
 const thriftWrapper = Thrift
-let parseUrl = null
-if (typeof window === "undefined") {
-  parseUrl = require("url").parse // eslint-disable-line global-require
+const parseUrl = isNodeRuntime() && require("url").parse // eslint-disable-line global-require
+if (isNodeRuntime()) { // Because browser Thrift and Node Thrift are exposed slightly differently.
   Thrift = Thrift.Thrift
   Thrift.Transport = thriftWrapper.TBufferedTransport
   Thrift.Protocol = thriftWrapper.TJSONProtocol
 }
+import * as helpers from "./helpers"
+import MapDClientV2 from "./mapd-client-v2"
+import processQueryResults from "./process-query-results"
 
 const COMPRESSION_LEVEL_DEFAULT = 3
 
 function arrayify (maybeArray) { return Array.isArray(maybeArray) ? maybeArray : [maybeArray] }
+
+function isNodeRuntime () { return typeof window === "undefined" }
 
 class MapdCon {
 
@@ -117,7 +116,7 @@ class MapdCon {
     for (let h = 0; h < hostLength; h++) {
       let client = null
 
-      if (typeof window === "undefined") {
+      if (isNodeRuntime()) {
         const {protocol, hostname, port} = parseUrl(transportUrls[h])
         const connection = thriftWrapper.createHttpConnection(
           hostname,
@@ -207,13 +206,7 @@ class MapdCon {
 
   getFrontendViews = (callback) => {
     if (this._sessionId) {
-      this._client[0].get_frontend_views(this._sessionId[0], (error, views) => {
-        if (error) {
-          callback(error)
-        } else {
-          callback(null, views)
-        }
-      })
+      this._client[0].get_frontend_views(this._sessionId[0], callback)
     } else {
       callback(new Error("No Session ID"))
     }
@@ -244,13 +237,7 @@ class MapdCon {
 
   getFrontendView = (viewName, callback) => {
     if (this._sessionId && viewName) {
-      this._client[0].get_frontend_view(this._sessionId[0], viewName, (error, view) => {
-        if (error) {
-          callback(error)
-        } else {
-          callback(null, view)
-        }
-      })
+      this._client[0].get_frontend_view(this._sessionId[0], viewName, callback)
     } else {
       callback(new Error("No Session ID"))
     }
@@ -279,13 +266,7 @@ class MapdCon {
   })
 
   getServerStatus = (callback) => {
-    this._client[0].get_server_status(this._sessionId[0], (result) => {
-      if (typeof result === "object" && result.hasOwnProperty("read_only") && result.hasOwnProperty("rendering_enabled") && result.hasOwnProperty("version")) {
-        callback(null, result)
-      } else {
-        callback(result, null)
-      }
-    })
+    this._client[0].get_server_status(this._sessionId[0], callback)
   }
 
   /**
@@ -412,9 +393,7 @@ class MapdCon {
   }
 
   getLinkView = (link, callback) => {
-    this._client[0].get_link_view(this._sessionId[0], link, theLink => {
-      callback(null, theLink)
-    })
+    this._client[0].get_link_view(this._sessionId[0], link, callback)
   }
 
   /**
@@ -446,13 +425,7 @@ class MapdCon {
 
   detectColumnTypes (fileName, copyParams, callback) {
     const thriftCopyParams = helpers.convertObjectToThriftCopyParams(copyParams)
-    this._client[0].detect_column_types(this._sessionId[0], fileName, thriftCopyParams, (err, res) => {
-      if (err) {
-        callback(err)
-      } else {
-        callback(null, res)
-      }
-    })
+    this._client[0].detect_column_types(this._sessionId[0], fileName, thriftCopyParams, callback)
   }
 
   /**
@@ -588,9 +561,9 @@ class MapdCon {
    */
   validateQuery (query) {
     return new Promise((resolve, reject) => {
-      this._client[0].sql_validate(this._sessionId[0], query, (err, res) => {
-        if (err) {
-          reject(err)
+      this._client[0].sql_validate(this._sessionId[0], query, (error, res) => {
+        if (error) {
+          reject(error)
         } else {
           resolve(this.convertFromThriftTypes(res))
         }
@@ -681,7 +654,7 @@ class MapdCon {
    * }, ...]
    */
   getFields (tableName, callback) {
-    this._client[0].get_table_details(this._sessionId[0], tableName, (fields) => {
+    this._client[0].get_table_details(this._sessionId[0], tableName, (error, fields) => {
       if (fields) {
         const rowDict = fields.row_desc.reduce((accum, value) => {
           accum[value.col_name] = value
@@ -689,7 +662,7 @@ class MapdCon {
         }, {})
         callback(null, this.convertFromThriftTypes(rowDict))
       } else {
-        callback(new Error("Table (" + tableName + ") not found"))
+        callback(new Error("Table (" + tableName + ") not found" + error))
       }
     })
   }
@@ -1162,7 +1135,7 @@ class MapdCon {
 
 // Set a global mapdcon function when mapdcon is brought in via script tag.
 if (typeof module === "object" && module.exports) {
-  if (typeof window !== "undefined") {
+  if (!isNodeRuntime()) {
     window.MapdCon = MapdCon
   }
 }
